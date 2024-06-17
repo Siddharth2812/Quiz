@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<h2>Welcome to the Quiz System</h2>
+<p>Select a dashboard to get started:</p>
+<ul>
+    <li><a href="{% url 'teacher_dashboard' %}">Teacher Dashboard</a></li>
+    <li><a href="{% url 'student_dashboard' %}">Student Dashboard</a></li>
+</ul>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Register as Student</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <label for="email">Email:</label>
+    <input type="email" name="email" required>
+    <label for="roll_no">Roll Number:</label>
+    <input type="text" name="roll_no" required>
+    <label for="student_class">Class:</label>
+    <input type="text" name="student_class" required>
+    <button type="submit">Register</button>
+</form>
+{% endblock %}
