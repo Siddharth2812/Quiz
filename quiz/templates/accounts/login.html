@@ -1,10 +1,41 @@
 {% extends 'base.html' %}
+{% block title %}Login - Quiz System{% endblock %}
 
 {% block content %}
+<div class="card">
   <h2>Login</h2>
+  
   <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Login</button>
+    
+    <div class="form-group">
+      <label for="{{ form.username.id_for_label }}">Username:</label>
+      {{ form.username }}
+    </div>
+    
+    <div class="form-group">
+      <label for="{{ form.password.id_for_label }}">Password:</label>
+      {{ form.password }}
+    </div>
+    
+    {% if form.errors %}
+      <div class="alert alert-error">
+        {% for field, errors in form.errors.items %}
+          {% for error in errors %}
+            <p>{{ error }}</p>
+          {% endfor %}
+        {% endfor %}
+      </div>
+    {% endif %}
+    
+    <div class="form-group">
+      <button type="submit" class="btn">Login</button>
+    </div>
   </form>
+  
+  <hr>
+  <p>Don't have an account?</p>
+  <a href="{% url 'register_teacher' %}" class="btn btn-secondary">Register as Teacher</a>
+  <a href="{% url 'register_student' %}" class="btn btn-secondary">Register as Student</a>
+</div>
 {% endblock %}

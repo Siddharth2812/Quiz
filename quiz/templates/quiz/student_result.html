@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ quiz.quiz_name }} Results - Quiz System{% endblock %}
+
+{% block content %}
+<div style="text-align: center; margin-bottom: 2rem;">
+    <h1 style="color: #333; margin-bottom: 0.5rem;">📊 Quiz Results</h1>
+    <h2 style="color: #667eea; margin-bottom: 1rem;">{{ quiz.quiz_name }}</h2>
+    <p style="color: #666;"><strong>Subject:</strong> {{ quiz.subject }} | <strong>Topic:</strong> {{ quiz.topic }}</p>
+</div>
+
+<!-- Overall Score Card -->
+<div class="card" style="text-align: center; margin-bottom: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+    <h2 style="margin-bottom: 1rem; color: white;">🎉 Your Score</h2>
+    <div style="font-size: 3rem; font-weight: bold; margin-bottom: 0.5rem;">
+        {{ result.score }} / {{ total_possible_score }}
+    </div>
+    <div style="font-size: 1.5rem; margin-bottom: 1rem;">
+        {{ percentage|floatformat:1 }}%
+    </div>
+    
+    {% if percentage >= 90 %}
+        <div style="font-size: 1.2rem; color: #90EE90;">🌟 Excellent Work!</div>
+    {% elif percentage >= 80 %}
+        <div style="font-size: 1.2rem; color: #87CEEB;">👏 Great Job!</div>
+    {% elif percentage >= 70 %}
+        <div style="font-size: 1.2rem; color: #F0E68C;">👍 Good Work!</div>
+    {% elif percentage >= 60 %}
+        <div style="font-size: 1.2rem; color: #DDA0DD;">📚 Keep Studying!</div>
+    {% else %}
+        <div style="font-size: 1.2rem; color: #FFB6C1;">💪 Keep Trying!</div>
+    {% endif %}
+</div>
+
+<!-- Performance Statistics -->
+<div class="card" style="margin-bottom: 2rem;">
+    <h3 style="color: #555; margin-bottom: 1.5rem;">📈 Performance Details</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #667eea;">{{ questions.count }}</div>
+            <div style="color: #666;">Total Questions</div>
+        </div>
+        <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #28a745;">{{ result.score|floatformat:0 }}</div>
+            <div style="color: #666;">Points Earned</div>
+        </div>
+        <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #17a2b8;">{{ result.top_score|floatformat:0 }}</div>
+            <div style="color: #666;">Class High Score</div>
+        </div>
+        <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #6c757d;">{{ result.score_avg|floatformat:1 }}</div>
+            <div style="color: #666;">Class Average</div>
+        </div>
+    </div>
+</div>
+
+<!-- Quiz Questions Overview -->
+<div class="card">
+    <h3 style="color: #555; margin-bottom: 1.5rem;">📝 Quiz Overview</h3>
+    
+    {% for question in questions %}
+    <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; background: #fafafa;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h4 style="color: #333; margin: 0;">Question {{ forloop.counter }}</h4>
+            <span style="background: #667eea; color: white; padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.9rem;">
+                {{ question.score }} points
+            </span>
+        </div>
+        
+        <p style="color: #555; margin-bottom: 1rem; line-height: 1.5;">{{ question.question }}</p>
+        
+        {% if question.question_type == 'multiple_choice' %}
+            <div style="background: white; padding: 1rem; border-radius: 6px; border-left: 4px solid #667eea;">
+                <strong style="color: #667eea;">Options:</strong>
+                <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                    {% for option in question.choices.options %}
+                    <li style="margin-bottom: 0.25rem; color: #666;">
+                        {% if forloop.counter0 == 0 %}A{% elif forloop.counter0 == 1 %}B{% elif forloop.counter0 == 2 %}C{% else %}D{% endif %}. {{ option }}
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div style="margin-top: 0.75rem;">
+                    <strong style="color: #28a745;">Correct Answer:</strong> 
+                    <span style="color: #28a745; font-weight: 500;">{{ question.correct_answers }}</span>
+                </div>
+            </div>
+        {% elif question.question_type == 'true_false' %}
+            <div style="background: white; padding: 1rem; border-radius: 6px; border-left: 4px solid #667eea;">
+                <strong style="color: #28a745;">Correct Answer:</strong> 
+                <span style="color: #28a745; font-weight: 500;">{{ question.correct_answers }}</span>
+            </div>
+        {% elif question.question_type == 'short_answer' %}
+            <div style="background: white; padding: 1rem; border-radius: 6px; border-left: 4px solid #667eea;">
+                <strong style="color: #28a745;">Correct Answer:</strong> 
+                <span style="color: #28a745; font-weight: 500;">{{ question.correct_answers }}</span>
+            </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<div style="text-align: center; margin-top: 2rem;">
+    <a href="{% url 'student_dashboard' %}" class="btn">Back to Dashboard</a>
+    <button onclick="window.print()" class="btn btn-secondary">Print Results</button>
+</div>
+
+<style>
+@media print {
+    .btn, nav, footer {
+        display: none !important;
+    }
+    
+    .container {
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 1rem !important;
+    }
+    
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        margin-bottom: 1rem !important;
+    }
+}
+</style>
+{% endblock %}

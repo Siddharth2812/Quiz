@@ -81,9 +81,12 @@ def login_view(request):
 
 @login_required
 def teacher_dashboard(request):
-    teacher = Teacher.objects.get(teacher_email=request.user.email)
-    quizzes = Quiz.objects.filter(teacher=teacher)
-    return render(request, 'accounts/teacher_dashboard.html', {'quizzes': quizzes})
+    try:
+        teacher = Teacher.objects.get(teacher_email=request.user.email)
+        quizzes = Quiz.objects.filter(teacher=teacher)
+        return render(request, 'accounts/teacher_dashboard.html', {'quizzes': quizzes})
+    except Teacher.DoesNotExist:
+        return redirect('login')
 
 @login_required
 def student_dashboard(request):

@@ -18,7 +18,7 @@ class Teacher(models.Model):
 class Quiz(models.Model):
     quiz_id = models.AutoField(primary_key=True)
     quiz_name = models.CharField(max_length=255)
-    quiz_code = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    quiz_code = models.CharField(max_length=20, unique=True)
     subject = models.CharField(max_length=255)
     topic = models.CharField(max_length=255)
     top_score = models.FloatField(default=0)

@@ -178,17 +178,49 @@ The application will be available at `http://127.0.0.1:8000/`
 3. **Join Quiz**: Use quiz codes provided by teachers to join quizzes
 4. **Take Quizzes**: Participate in available quizzes
 
-## URL Structure
+## URL Structure & Implementation Status
 
-- `/` - Home page
-- `/accounts/register/teacher/` - Teacher registration
-- `/accounts/register/student/` - Student registration
-- `/accounts/login/` - Login page
-- `/accounts/teacher/dashboard/` - Teacher dashboard
-- `/accounts/student/dashboard/` - Student dashboard
-- `/quiz/quiz/create/` - Create new quiz
-- `/quiz/quiz/<quiz_id>/add_question/` - Add questions to quiz
-- `/quiz/quiz/join/` - Join quiz with code
+### ✅ **Working Routes**
+- `/` - Home page (implemented in quiz_system/views.py)
+- `/accounts/register/teacher/` - Teacher registration (implemented, template exists)
+- `/accounts/register/student/` - Student registration (implemented, template exists)
+- `/accounts/login/` - Login page (implemented, needs template)
+
+### ⚠️ **Partially Working Routes**
+- `/accounts/teacher/dashboard/` - Teacher dashboard (implemented in accounts app, template exists)
+- `/accounts/student/dashboard/` - Student dashboard (implemented in accounts app, template exists)
+- `/quiz/teacher/dashboard/` - Alternative teacher dashboard (raw SQL implementation)
+- `/quiz/student/dashboard/` - Alternative student dashboard (raw SQL implementation)
+
+### ❌ **Routes with Issues**
+- `/quiz/quiz/create/` - Create quiz (implemented but template path mismatch: expects `create_quiz.html` but not in correct folder)
+- `/quiz/quiz/<quiz_id>/add_question/` - Add questions (implemented but template path mismatch: expects `add_question.html`)
+- `/quiz/quiz/join/` - Join quiz (implemented but template path mismatch: expects `join_quiz.html`)
+
+### 🔧 **Issues to Fix**
+
+1. **Duplicate Dashboard Views**: Both `accounts` and `quiz` apps have dashboard views - need to consolidate
+2. **Template Path Mismatches**: Quiz app views expect templates in root template directory, but templates are in `quiz/templates/accounts/`
+3. **Mixed Data Access**: Accounts app uses Django ORM, quiz app uses raw SQL - should standardize
+4. **Missing Templates**: Several templates referenced by views don't exist
+
+### 📁 **Existing Templates**
+```
+quiz/templates/
+├── accounts/
+│   ├── login.html
+│   ├── register_student.html
+│   ├── register_teacher.html
+│   ├── student_dashboard.html
+│   └── teacher_dashboard.html
+├── base.html
+└── home.html
+```
+
+### 📋 **Missing Templates**
+- `create_quiz.html` (referenced by quiz/views.py:47)
+- `add_question.html` (referenced by quiz/views.py:62)
+- `join_quiz.html` (referenced by quiz/views.py:78)
 
 ## Troubleshooting
 

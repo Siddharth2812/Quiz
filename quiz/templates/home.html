@@ -1,10 +1,39 @@
 {% extends 'base.html' %}
-{% block title %}Home{% endblock %}
+{% block title %}Home - Quiz System{% endblock %}
 {% block content %}
-<h2>Welcome to the Quiz System</h2>
-<p>Select a dashboard to get started:</p>
-<ul>
-    <li><a href="{% url 'teacher_dashboard' %}">Teacher Dashboard</a></li>
-    <li><a href="{% url 'student_dashboard' %}">Student Dashboard</a></li>
-</ul>
+<div class="card">
+    <h2>Welcome to Quiz System</h2>
+    <p>A simple platform for creating and taking quizzes.</p>
+</div>
+
+{% if not user.is_authenticated %}
+<div class="quiz-grid">
+    <div class="quiz-card">
+        <h3>For Teachers</h3>
+        <p>Create and manage quizzes, add questions, and track student performance.</p>
+        <a href="{% url 'register_teacher' %}" class="btn">Register as Teacher</a>
+        <a href="{% url 'login' %}" class="btn btn-secondary">Login</a>
+    </div>
+    
+    <div class="quiz-card">
+        <h3>For Students</h3>
+        <p>Join quizzes using unique codes and test your knowledge.</p>
+        <a href="{% url 'register_student' %}" class="btn">Register as Student</a>
+        <a href="{% url 'login' %}" class="btn btn-secondary">Login</a>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <h3>Welcome back, {{ user.username }}!</h3>
+    {% if user.is_staff %}
+        <p>Manage your quizzes and view student results.</p>
+        <a href="{% url 'teacher_dashboard' %}" class="btn">Teacher Dashboard</a>
+        <a href="{% url 'create_quiz' %}" class="btn btn-secondary">Create Quiz</a>
+    {% else %}
+        <p>Take quizzes and view your results.</p>
+        <a href="{% url 'student_dashboard' %}" class="btn">Student Dashboard</a>
+        <a href="{% url 'join_quiz' %}" class="btn btn-secondary">Join Quiz</a>
+    {% endif %}
+</div>
+{% endif %}
 {% endblock %}

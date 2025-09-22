@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ quiz.quiz_name }} - Quiz System{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="color: #333; margin-bottom: 0.5rem;">{{ quiz.quiz_name }}</h1>
+        <p style="color: #666; margin-bottom: 0.5rem;"><strong>Subject:</strong> {{ quiz.subject }}</p>
+        <p style="color: #666;"><strong>Topic:</strong> {{ quiz.topic }}</p>
+    </div>
+    
+    <div style="background: #e3f2fd; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; text-align: center;">
+        <h3 style="color: #1976d2; margin-bottom: 0.5rem;">📝 Instructions</h3>
+        <ul style="text-align: left; color: #666; margin: 0; padding-left: 2rem;">
+            <li>Read each question carefully</li>
+            <li>Select your answer for multiple choice and true/false questions</li>
+            <li>Type your answer for short answer questions</li>
+            <li>You can only submit this quiz once</li>
+            <li>Click "Submit Quiz" when you're done</li>
+        </ul>
+    </div>
+    
+    <form method="post" action="{% url 'submit_quiz' quiz.quiz_id %}" id="quiz-form">
+        {% csrf_token %}
+        
+        {% for question in questions %}
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3 style="color: #555; margin-bottom: 1rem;">
+                Question {{ forloop.counter }} 
+                <span style="color: #667eea;">({{ question.score }} points)</span>
+            </h3>
+            <p style="color: #333; font-size: 1.1rem; margin-bottom: 1.5rem; line-height: 1.6;">
+                {{ question.question }}
+            </p>
+            
+            {% if question.question_type == 'multiple_choice' %}
+                {% for option in question.choices.options %}
+                <div style="margin-bottom: 0.75rem;">
+                    <label style="display: flex; align-items: center; cursor: pointer; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; transition: all 0.3s ease;">
+                        <input type="radio" name="question_{{ question.question_id }}" value="{% if forloop.counter0 == 0 %}A{% elif forloop.counter0 == 1 %}B{% elif forloop.counter0 == 2 %}C{% else %}D{% endif %}" 
+                               style="margin-right: 0.75rem; transform: scale(1.2);" required>
+                        <span style="color: #333;">{% if forloop.counter0 == 0 %}A{% elif forloop.counter0 == 1 %}B{% elif forloop.counter0 == 2 %}C{% else %}D{% endif %}. {{ option }}</span>
+                    </label>
+                </div>
+                {% endfor %}
+                
+            {% elif question.question_type == 'true_false' %}
+                <div style="margin-bottom: 0.75rem;">
+                    <label style="display: flex; align-items: center; cursor: pointer; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; transition: all 0.3s ease;">
+                        <input type="radio" name="question_{{ question.question_id }}" value="True" 
+                               style="margin-right: 0.75rem; transform: scale(1.2);" required>
+                        <span style="color: #333;">True</span>
+                    </label>
+                </div>
+                <div style="margin-bottom: 0.75rem;">
+                    <label style="display: flex; align-items: center; cursor: pointer; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; transition: all 0.3s ease;">
+                        <input type="radio" name="question_{{ question.question_id }}" value="False" 
+                               style="margin-right: 0.75rem; transform: scale(1.2);" required>
+                        <span style="color: #333;">False</span>
+                    </label>
+                </div>
+                
+            {% elif question.question_type == 'short_answer' %}
+                <input type="text" name="question_{{ question.question_id }}" required
+                       placeholder="Type your answer here..."
+                       style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+            {% endif %}
+        </div>
+        {% endfor %}
+        
+        <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #eee;">
+            <button type="submit" class="btn" style="font-size: 1.1rem; padding: 1rem 2rem;" 
+                    onclick="return confirm('Are you sure you want to submit this quiz? You cannot change your answers after submission.')">
+                Submit Quiz
+            </button>
+            <a href="{% url 'student_dashboard' %}" class="btn btn-secondary" style="margin-left: 1rem;">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+/* Hover effects for radio button labels */
+input[type="radio"]:hover + span,
+label:hover {
+    color: #667eea !important;
+}
+
+input[type="radio"]:checked + span {
+    color: #667eea !important;
+    font-weight: 500;
+}
+
+label:has(input[type="radio"]:checked) {
+    border-color: #667eea !important;
+    background-color: #f8f9ff !important;
+}
+
+label:hover {
+    border-color: #667eea !important;
+    background-color: #f8f9ff !important;
+}
+</style>
+
+<script>
+// Auto-save progress (optional enhancement)
+document.getElementById('quiz-form').addEventListener('change', function() {
+    // Could implement auto-save functionality here if needed
+});
+</script>
+{% endblock %}

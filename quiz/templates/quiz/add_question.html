@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Question - Quiz System{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 style="color: #333; margin-bottom: 1.5rem; text-align: center;">Add Question to Quiz</h2>
+    
+    <form method="post" style="max-width: 700px; margin: 0 auto;">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="question">Question:</label>
+            <textarea id="question" name="question" required rows="3" 
+                      placeholder="Enter your question here..."></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="question_type">Question Type:</label>
+            <select id="question_type" name="question_type" required onchange="toggleChoices()">
+                <option value="">Select Question Type</option>
+                <option value="multiple_choice">Multiple Choice</option>
+                <option value="true_false">True/False</option>
+                <option value="short_answer">Short Answer</option>
+            </select>
+        </div>
+        
+        <div id="choices_section" style="display: none;">
+            <h4 style="color: #555; margin-bottom: 1rem;">Answer Choices:</h4>
+            
+            <div class="form-group">
+                <label for="choice_a">Choice A:</label>
+                <input type="text" id="choice_a" name="choice_a" placeholder="Enter choice A">
+            </div>
+            
+            <div class="form-group">
+                <label for="choice_b">Choice B:</label>
+                <input type="text" id="choice_b" name="choice_b" placeholder="Enter choice B">
+            </div>
+            
+            <div class="form-group">
+                <label for="choice_c">Choice C:</label>
+                <input type="text" id="choice_c" name="choice_c" placeholder="Enter choice C (optional)">
+            </div>
+            
+            <div class="form-group">
+                <label for="choice_d">Choice D:</label>
+                <input type="text" id="choice_d" name="choice_d" placeholder="Enter choice D (optional)">
+            </div>
+            
+            <div class="form-group">
+                <label for="correct_choice">Correct Answer:</label>
+                <select id="correct_choice" name="correct_choice">
+                    <option value="">Select Correct Answer</option>
+                    <option value="A">Choice A</option>
+                    <option value="B">Choice B</option>
+                    <option value="C">Choice C</option>
+                    <option value="D">Choice D</option>
+                </select>
+            </div>
+        </div>
+        
+        <div id="tf_section" style="display: none;">
+            <div class="form-group">
+                <label for="tf_answer">Correct Answer:</label>
+                <select id="tf_answer" name="tf_answer">
+                    <option value="">Select Correct Answer</option>
+                    <option value="True">True</option>
+                    <option value="False">False</option>
+                </select>
+            </div>
+        </div>
+        
+        <div id="short_answer_section" style="display: none;">
+            <div class="form-group">
+                <label for="correct_answer">Correct Answer:</label>
+                <input type="text" id="correct_answer" name="correct_answer" 
+                       placeholder="Enter the correct answer">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="score">Points:</label>
+            <input type="number" id="score" name="score" min="1" max="100" value="10" required>
+        </div>
+        
+        <div class="form-group" style="text-align: center; margin-top: 2rem;">
+            <button type="submit" class="btn">Add Question</button>
+            <a href="{% url 'teacher_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </form>
+</div>
+
+<div class="card" style="margin-top: 2rem;">
+    <h3 style="color: #555; margin-bottom: 1rem;">Question Guidelines:</h3>
+    <ul style="color: #666; line-height: 1.6;">
+        <li><strong>Multiple Choice:</strong> Provide at least 2 choices, up to 4 choices maximum</li>
+        <li><strong>True/False:</strong> Simple true or false questions</li>
+        <li><strong>Short Answer:</strong> Students type their answer (case-sensitive matching)</li>
+        <li>Points can range from 1 to 100</li>
+        <li>Make sure to select the correct answer for each question</li>
+        <li>Keep questions clear and concise</li>
+    </ul>
+</div>
+
+<script>
+function toggleChoices() {
+    const questionType = document.getElementById('question_type').value;
+    const choicesSection = document.getElementById('choices_section');
+    const tfSection = document.getElementById('tf_section');
+    const shortAnswerSection = document.getElementById('short_answer_section');
+    
+    // Hide all sections first
+    choicesSection.style.display = 'none';
+    tfSection.style.display = 'none';
+    shortAnswerSection.style.display = 'none';
+    
+    // Show relevant section based on question type
+    if (questionType === 'multiple_choice') {
+        choicesSection.style.display = 'block';
+    } else if (questionType === 'true_false') {
+        tfSection.style.display = 'block';
+    } else if (questionType === 'short_answer') {
+        shortAnswerSection.style.display = 'block';
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Join Quiz - Quiz System{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 style="color: #333; margin-bottom: 1.5rem; text-align: center;">Join a Quiz</h2>
+    
+    <form method="post" style="max-width: 500px; margin: 0 auto;">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="code" style="font-size: 1.1rem;">Quiz Code:</label>
+            <input type="text" id="code" name="code" required 
+                   placeholder="Enter the quiz code provided by your teacher"
+                   value="{{ request.GET.code|default:'' }}"
+                   style="font-size: 1.2rem; text-align: center; letter-spacing: 2px; text-transform: uppercase;">
+        </div>
+        
+        <div class="form-group" style="text-align: center; margin-top: 2rem;">
+            <button type="submit" class="btn">Join Quiz</button>
+            <a href="{% url 'student_dashboard' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<div class="card" style="margin-top: 2rem;">
+    <h3 style="color: #555; margin-bottom: 1rem;">How to Join a Quiz:</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; color: #666;">
+        <div style="text-align: center; padding: 1rem;">
+            <div style="font-size: 2rem; color: #667eea; margin-bottom: 0.5rem;">1️⃣</div>
+            <h4 style="color: #555;">Get Quiz Code</h4>
+            <p>Ask your teacher for the unique quiz code</p>
+        </div>
+        <div style="text-align: center; padding: 1rem;">
+            <div style="font-size: 2rem; color: #667eea; margin-bottom: 0.5rem;">2️⃣</div>
+            <h4 style="color: #555;">Enter Code</h4>
+            <p>Type the code in the field above</p>
+        </div>
+        <div style="text-align: center; padding: 1rem;">
+            <div style="font-size: 2rem; color: #667eea; margin-bottom: 0.5rem;">3️⃣</div>
+            <h4 style="color: #555;">Start Quiz</h4>
+            <p>Begin answering questions immediately</p>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 1rem;">
+    <h3 style="color: #555; margin-bottom: 1rem;">Important Notes:</h3>
+    <ul style="color: #666; line-height: 1.6;">
+        <li>Quiz codes are case-insensitive</li>
+        <li>Make sure you have a stable internet connection</li>
+        <li>Once you join a quiz, it will appear in your dashboard</li>
+        <li>Contact your teacher if the quiz code doesn't work</li>
+        <li>You can only join each quiz once</li>
+    </ul>
+</div>
+
+{% if messages %}
+    <div style="margin-top: 1rem;">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<script>
+// Auto-format quiz code input
+document.getElementById('code').addEventListener('input', function(e) {
+    e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+});
+</script>
+{% endblock %}

@@ -1,9 +1,122 @@
 {% extends 'base.html' %}
+{% block title %}Teacher Dashboard - Quiz System{% endblock %}
 {% block content %}
-<h2>Teacher Dashboard</h2>
-<ul>
-    {% for quiz in quizzes %}
-    <li>{{ quiz.quiz_name }}</li>
-    {% endfor %}
-</ul>
+<div class="card">
+    <h2>Teacher Dashboard</h2>
+    <p>Manage your quizzes and track student progress.</p>
+    
+    <div>
+        <a href="{% url 'create_quiz' %}" class="btn">Create New Quiz</a>
+        <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+    </div>
+</div>
+
+{% if quizzes %}
+<div class="card">
+    <h2 style="color: #555; margin-bottom: 1.5rem;">Your Quizzes</h2>
+    <div class="quiz-grid">
+        {% for quiz in quizzes %}
+        <div class="quiz-card">
+            <h3 style="color: #667eea; margin-bottom: 0.5rem;">{{ quiz.quiz_name }}</h3>
+            <p style="color: #666; margin-bottom: 0.5rem;"><strong>Subject:</strong> {{ quiz.subject }}</p>
+            <p style="color: #666; margin-bottom: 0.5rem;"><strong>Topic:</strong> {{ quiz.topic }}</p>
+            <p style="color: #666; margin-bottom: 1rem;"><strong>Quiz Code:</strong> 
+                <span style="background: #f0f0f0; padding: 0.25rem 0.5rem; border-radius: 4px; font-family: monospace; font-weight: bold;">
+                    {{ quiz.quiz_code }}
+                </span>
+            </p>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <a href="{% url 'add_question' quiz.quiz_id %}" class="btn btn-secondary" style="font-size: 0.9rem;">Add Questions</a>
+                <a href="{% url 'view_quiz_results' quiz.quiz_id %}" class="btn btn-secondary" style="font-size: 0.9rem;">View Results</a>
+                <button onclick="copyQuizLink('{{ quiz.quiz_code }}')" class="btn btn-secondary" style="font-size: 0.9rem;">Copy Join Link</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="card" style="text-align: center;">
+    <h3 style="color: #555; margin-bottom: 1rem;">No Quizzes Yet</h3>
+    <p style="color: #666; margin-bottom: 2rem;">You haven't created any quizzes yet. Start by creating your first quiz!</p>
+    <a href="{% url 'create_quiz' %}" class="btn">Create Your First Quiz</a>
+</div>
+{% endif %}
+
+<div class="card" style="margin-top: 2rem;">
+    <h3 style="color: #555; margin-bottom: 1rem;">Quick Actions</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+        <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+            <div style="font-size: 2rem; color: #667eea; margin-bottom: 0.5rem;">📝</div>
+            <h4 style="color: #555;">Create Quiz</h4>
+            <p style="color: #666; margin-bottom: 1rem;">Start with a new quiz</p>
+            <a href="{% url 'create_quiz' %}" class="btn btn-secondary">Create</a>
+        </div>
+        <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+            <div style="font-size: 2rem; color: #667eea; margin-bottom: 0.5rem;">❓</div>
+            <h4 style="color: #555;">Add Questions</h4>
+            <p style="color: #666; margin-bottom: 1rem;">Add questions to existing quizzes</p>
+            {% if quizzes %}
+                <a href="{% url 'add_question' quizzes.0.quiz_id %}" class="btn btn-secondary">Add Questions</a>
+            {% else %}
+                <span style="color: #999;">Create a quiz first</span>
+            {% endif %}
+        </div>
+        <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+            <div style="font-size: 2rem; color: #667eea; margin-bottom: 0.5rem;">📊</div>
+            <h4 style="color: #555;">View Results</h4>
+            <p style="color: #666; margin-bottom: 1rem;">Check student performance</p>
+            {% if quizzes %}
+                <a href="{% url 'view_quiz_results' quizzes.0.quiz_id %}" class="btn btn-secondary">View Results</a>
+            {% else %}
+                <span style="color: #999;">Create a quiz first</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function copyQuizLink(code) {
+    // Create the full join link
+    const baseUrl = window.location.origin;
+    const joinLink = baseUrl + '/quiz/join/?code=' + code;
+    
+    navigator.clipboard.writeText(joinLink).then(function() {
+        // Create a nice temporary notification
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 10000;
+            font-size: 0.9rem;
+            max-width: 300px;
+        `;
+        notification.innerHTML = `
+            <strong>✓ Link Copied!</strong><br>
+            Share this link with your students:<br>
+            <small style="word-break: break-all;">${joinLink}</small>
+        `;
+        document.body.appendChild(notification);
+        
+        // Remove notification after 4 seconds
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 4000);
+    }, function(err) {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = joinLink;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert('Quiz join link copied to clipboard!\n\nShare this link with your students:\n' + joinLink);
+    });
+}
+</script>
 {% endblock %}

@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ quiz.quiz_name }} Results - Quiz System{% endblock %}
+
+{% block content %}
+<div style="text-align: center; margin-bottom: 2rem;">
+    <h1 style="color: #333; margin-bottom: 0.5rem;">📊 Class Results</h1>
+    <h2 style="color: #667eea; margin-bottom: 1rem;">{{ quiz.quiz_name }}</h2>
+    <p style="color: #666;"><strong>Subject:</strong> {{ quiz.subject }} | <strong>Topic:</strong> {{ quiz.topic }}</p>
+</div>
+
+<!-- Overall Statistics -->
+<div class="card" style="margin-bottom: 2rem;">
+    <h3 style="color: #555; margin-bottom: 1.5rem;">📈 Overall Statistics</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+        <div style="text-align: center; padding: 1rem; background: #e3f2fd; border-radius: 8px;">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #1976d2;">{{ stats.total_students }}</div>
+            <div style="color: #666;">Students Completed</div>
+        </div>
+        <div style="text-align: center; padding: 1rem; background: #e8f5e8; border-radius: 8px;">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #388e3c;">{{ stats.highest_score|floatformat:0 }}</div>
+            <div style="color: #666;">Highest Score</div>
+        </div>
+        <div style="text-align: center; padding: 1rem; background: #fff3e0; border-radius: 8px;">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #f57c00;">{{ stats.average_score|floatformat:1 }}</div>
+            <div style="color: #666;">Average Score</div>
+        </div>
+        <div style="text-align: center; padding: 1rem; background: #fce4ec; border-radius: 8px;">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #c2185b;">{{ stats.lowest_score|floatformat:0 }}</div>
+            <div style="color: #666;">Lowest Score</div>
+        </div>
+        <div style="text-align: center; padding: 1rem; background: #f3e5f5; border-radius: 8px;">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #7b1fa2;">{{ stats.average_percentage|floatformat:1 }}%</div>
+            <div style="color: #666;">Average Percentage</div>
+        </div>
+        <div style="text-align: center; padding: 1rem; background: #f1f8e9; border-radius: 8px;">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #33691e;">{{ total_questions }}</div>
+            <div style="color: #666;">Total Questions</div>
+        </div>
+    </div>
+</div>
+
+{% if results %}
+<!-- Student Results Table -->
+<div class="card">
+    <h3 style="color: #555; margin-bottom: 1.5rem;">👥 Individual Student Results</h3>
+    
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+            <thead>
+                <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                    <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #dee2e6; color: #495057;">Rank</th>
+                    <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #dee2e6; color: #495057;">Student Name</th>
+                    <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #dee2e6; color: #495057;">Roll Number</th>
+                    <th style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; color: #495057;">Score</th>
+                    <th style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; color: #495057;">Percentage</th>
+                    <th style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; color: #495057;">Grade</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                <tr style="{% if forloop.first %}background: #fff3cd;{% elif forloop.counter == 2 %}background: #f8f9fa;{% elif forloop.counter == 3 %}background: #f1f3f4;{% endif %} border-bottom: 1px solid #dee2e6;">
+                    <td style="padding: 0.75rem; border-bottom: 1px solid #dee2e6;">
+                        {% if forloop.first %}
+                            🥇 1st
+                        {% elif forloop.counter == 2 %}
+                            🥈 2nd
+                        {% elif forloop.counter == 3 %}
+                            🥉 3rd
+                        {% else %}
+                            {{ forloop.counter }}
+                        {% endif %}
+                    </td>
+                    <td style="padding: 0.75rem; border-bottom: 1px solid #dee2e6; font-weight: 500;">
+                        {{ result.student.student_name }}
+                    </td>
+                    <td style="padding: 0.75rem; border-bottom: 1px solid #dee2e6; color: #666;">
+                        {{ result.student.roll_no }}
+                    </td>
+                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; font-weight: 500;">
+                        {{ result.score|floatformat:0 }} / {{ stats.total_possible|floatformat:0 }}
+                    </td>
+                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6;">
+                        <span style="
+                            {% if result.percentage >= 90 %}color: #28a745; font-weight: bold;
+                            {% elif result.percentage >= 80 %}color: #17a2b8; font-weight: 500;
+                            {% elif result.percentage >= 70 %}color: #ffc107; font-weight: 500;
+                            {% elif result.percentage >= 60 %}color: #fd7e14;
+                            {% else %}color: #dc3545;
+                            {% endif %}
+                        ">
+                            {{ result.percentage|floatformat:1 }}%
+                        </span>
+                    </td>
+                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6;">
+                        {% if result.percentage >= 90 %}
+                            <span style="background: #28a745; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">A+</span>
+                        {% elif result.percentage >= 80 %}
+                            <span style="background: #17a2b8; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">A</span>
+                        {% elif result.percentage >= 70 %}
+                            <span style="background: #ffc107; color: black; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">B</span>
+                        {% elif result.percentage >= 60 %}
+                            <span style="background: #fd7e14; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">C</span>
+                        {% else %}
+                            <span style="background: #dc3545; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">F</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+{% else %}
+<div class="card" style="text-align: center; padding: 3rem;">
+    <h3 style="color: #999; margin-bottom: 1rem;">📭 No Results Yet</h3>
+    <p style="color: #666;">No students have completed this quiz yet.</p>
+</div>
+{% endif %}
+
+<div style="text-align: center; margin-top: 2rem;">
+    <a href="{% url 'teacher_dashboard' %}" class="btn">Back to Dashboard</a>
+    {% if results %}
+        <button onclick="window.print()" class="btn btn-secondary">Print Results</button>
+        <button onclick="exportToCSV()" class="btn btn-secondary">Export CSV</button>
+    {% endif %}
+</div>
+
+<style>
+@media print {
+    .btn, nav, footer {
+        display: none !important;
+    }
+    
+    .container {
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 1rem !important;
+    }
+    
+    table {
+        font-size: 0.8rem;
+    }
+}
+</style>
+
+<script>
+function exportToCSV() {
+    const table = document.querySelector('table');
+    if (!table) return;
+    
+    let csv = [];
+    const rows = table.querySelectorAll('tr');
+    
+    for (let i = 0; i < rows.length; i++) {
+        const row = [], cols = rows[i].querySelectorAll('td, th');
+        
+        for (let j = 0; j < cols.length; j++) {
+            // Clean up the text content
+            let cellText = cols[j].innerText.replace(/"/g, '""');
+            row.push('"' + cellText + '"');
+        }
+        
+        csv.push(row.join(','));
+    }
+    
+    // Create and download the file
+    const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
+    const downloadLink = document.createElement('a');
+    downloadLink.download = '{{ quiz.quiz_name|slugify }}_results.csv';
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = 'none';
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
+</script>
+{% endblock %}

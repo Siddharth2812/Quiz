@@ -1,9 +1,99 @@
 {% extends 'base.html' %}
+{% block title %}Student Dashboard - Quiz System{% endblock %}
 {% block content %}
-<h2>Student Dashboard</h2>
-<ul>
-    {% for quiz in quizzes %}
-    <li>{{ quiz.quiz_name }}</li>
-    {% endfor %}
-</ul>
+<div style="text-align: center; margin-bottom: 2rem;">
+    <h1 style="color: #333; margin-bottom: 1rem;">Student Dashboard</h1>
+    <p style="color: #666; font-size: 1.1rem;">View and participate in your quizzes</p>
+</div>
+
+<div style="text-align: center; margin-bottom: 2rem;">
+    <a href="{% url 'join_quiz' %}" class="btn">Join New Quiz</a>
+    <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+</div>
+
+{% if quizzes %}
+<div class="card">
+    <h2 style="color: #555; margin-bottom: 1.5rem;">Your Enrolled Quizzes</h2>
+    <div class="quiz-grid">
+        {% for quiz in quizzes %}
+        <div class="quiz-card">
+            <h3 style="color: #667eea; margin-bottom: 0.5rem;">{{ quiz.quiz_name }}</h3>
+            <p style="color: #666; margin-bottom: 0.5rem;"><strong>Subject:</strong> {{ quiz.subject }}</p>
+            <p style="color: #666; margin-bottom: 0.5rem;"><strong>Topic:</strong> {{ quiz.topic }}</p>
+            <p style="color: #666; margin-bottom: 1rem;"><strong>Teacher:</strong> {{ quiz.teacher }}</p>
+            
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center;">
+                <a href="{% url 'take_quiz' quiz.quiz_id %}" class="btn btn-secondary" style="font-size: 0.9rem;">Take Quiz</a>
+                <a href="{% url 'student_quiz_result' quiz.quiz_id %}" class="btn btn-secondary" style="font-size: 0.9rem;">View Results</a>
+            </div>
+            
+            <div style="margin-top: 1rem; padding: 0.5rem; background: #f8f9fa; border-radius: 4px; font-size: 0.9rem;">
+                <strong>Status:</strong> 
+                <span style="color: #28a745;">Available</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="card" style="text-align: center;">
+    <h3 style="color: #555; margin-bottom: 1rem;">No Quizzes Yet</h3>
+    <p style="color: #666; margin-bottom: 2rem;">You haven't joined any quizzes yet. Ask your teacher for a quiz code to get started!</p>
+    <a href="{% url 'join_quiz' %}" class="btn">Join Your First Quiz</a>
+</div>
+{% endif %}
+
+<div class="card" style="margin-top: 2rem;">
+    <h3 style="color: #555; margin-bottom: 1rem;">Quick Actions</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+        <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+            <div style="font-size: 2rem; color: #667eea; margin-bottom: 0.5rem;">🔗</div>
+            <h4 style="color: #555;">Join Quiz</h4>
+            <p style="color: #666; margin-bottom: 1rem;">Enter a quiz code to join</p>
+            <a href="{% url 'join_quiz' %}" class="btn btn-secondary">Join</a>
+        </div>
+        <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+            <div style="font-size: 2rem; color: #667eea; margin-bottom: 0.5rem;">📝</div>
+            <h4 style="color: #555;">Take Quiz</h4>
+            <p style="color: #666; margin-bottom: 1rem;">Start an available quiz</p>
+            {% if quizzes %}
+                <a href="{% url 'take_quiz' quizzes.0.quiz_id %}" class="btn btn-secondary">Take Quiz</a>
+            {% else %}
+                <span style="color: #999;">Join a quiz first</span>
+            {% endif %}
+        </div>
+        <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+            <div style="font-size: 2rem; color: #667eea; margin-bottom: 0.5rem;">📊</div>
+            <h4 style="color: #555;">View Results</h4>
+            <p style="color: #666; margin-bottom: 1rem;">Check your scores</p>
+            {% if quizzes %}
+                <a href="{% url 'student_quiz_result' quizzes.0.quiz_id %}" class="btn btn-secondary">View Results</a>
+            {% else %}
+                <span style="color: #999;">No results yet</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 2rem;">
+    <h3 style="color: #555; margin-bottom: 1rem;">Performance Summary</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; text-align: center;">
+        <div style="padding: 1rem; background: #e3f2fd; border-radius: 8px;">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #1976d2;">{{ quizzes|length }}</div>
+            <div style="color: #666;">Enrolled Quizzes</div>
+        </div>
+        <div style="padding: 1rem; background: #e8f5e8; border-radius: 8px;">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #388e3c;">0</div>
+            <div style="color: #666;">Completed</div>
+        </div>
+        <div style="padding: 1rem; background: #fff3e0; border-radius: 8px;">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #f57c00;">{{ quizzes|length }}</div>
+            <div style="color: #666;">Pending</div>
+        </div>
+        <div style="padding: 1rem; background: #fce4ec; border-radius: 8px;">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #c2185b;">-</div>
+            <div style="color: #666;">Average Score</div>
+        </div>
+    </div>
+</div>
 {% endblock %}

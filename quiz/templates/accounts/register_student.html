@@ -1,15 +1,62 @@
 {% extends 'base.html' %}
+{% block title %}Student Registration - Quiz System{% endblock %}
+
 {% block content %}
-<h2>Register as Student</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <label for="email">Email:</label>
-    <input type="email" name="email" required>
-    <label for="roll_no">Roll Number:</label>
-    <input type="text" name="roll_no" required>
-    <label for="student_class">Class:</label>
-    <input type="text" name="student_class" required>
-    <button type="submit">Register</button>
-</form>
+<div class="card">
+    <h2>Student Registration</h2>
+    <p>Create your student account to join and participate in quizzes.</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="{{ form.username.id_for_label }}">Username:</label>
+            {{ form.username }}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.email.id_for_label }}">Email Address:</label>
+            {{ form.email }}
+        </div>
+        
+        <div class="form-group">
+            <label for="roll_no">Roll Number:</label>
+            <input type="text" id="roll_no" name="roll_no" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="student_class">Class:</label>
+            <input type="text" id="student_class" name="student_class" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.password1.id_for_label }}">Password:</label>
+            {{ form.password1 }}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.password2.id_for_label }}">Confirm Password:</label>
+            {{ form.password2 }}
+        </div>
+        
+        {% if form.errors %}
+            <div class="alert alert-error">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <div class="form-group">
+            <button type="submit" class="btn">Create Account</button>
+            <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+    
+    <hr>
+    <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+    <p>Need a teacher account? <a href="{% url 'register_teacher' %}">Register as Teacher</a></p>
+</div>
 {% endblock %}
