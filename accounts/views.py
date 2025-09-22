@@ -20,12 +20,11 @@ def register_teacher(request):
             dept = request.POST.get('dept')
             subject = request.POST.get('subject')
 
-            # Create teacher record using raw SQL
+            # Create teacher record using raw SQL (let database auto-generate teacher_id)
             with connection.cursor() as cursor:
-                teacher_id = str(uuid.uuid4())
                 cursor.execute(
-                    "INSERT INTO quiz_teacher (teacher_id, teacher_name, teacher_email, dept, subject) VALUES (%s, %s, %s, %s, %s)",
-                    [teacher_id, teacher_name, teacher_email, dept, subject]
+                    "INSERT INTO quiz_teacher (teacher_name, teacher_email, dept, subject) VALUES (%s, %s, %s, %s)",
+                    [teacher_name, teacher_email, dept, subject]
                 )
             
             user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password1'])
@@ -48,12 +47,11 @@ def register_student(request):
             roll_no = request.POST.get('roll_no')
             student_class = request.POST.get('student_class')
 
-            # Create student record using raw SQL
+            # Create student record using raw SQL (let database auto-generate student_id)
             with connection.cursor() as cursor:
-                student_id = str(uuid.uuid4())
                 cursor.execute(
-                    "INSERT INTO quiz_student (student_id, student_name, student_email, roll_no, student_class) VALUES (%s, %s, %s, %s, %s)",
-                    [student_id, student_name, student_email, roll_no, student_class]
+                    "INSERT INTO quiz_student (student_name, student_email, roll_no, student_class) VALUES (%s, %s, %s, %s)",
+                    [student_name, student_email, roll_no, student_class]
                 )
             
             user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password1'])

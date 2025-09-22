@@ -1,8 +1,7 @@
 import uuid
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import JsonResponse
 from django.db import connection
 # Models are no longer needed since we use raw SQL
 
@@ -28,14 +27,13 @@ def create_quiz(request):
                 
                 teacher_id = teacher_result[0]
                 
-                # Generate quiz code and create quiz using raw SQL
+                # Generate quiz code and create quiz using raw SQL (let database auto-generate quiz_id)
                 quiz_code = str(uuid.uuid4())[:8].upper()
-                quiz_id = str(uuid.uuid4())
                 
                 cursor.execute(
-                    """INSERT INTO quiz_quiz (quiz_id, quiz_name, quiz_code, subject, topic, teacher_id) 
-                       VALUES (%s, %s, %s, %s, %s, %s)""",
-                    [quiz_id, quiz_name, quiz_code, subject, topic, teacher_id]
+                    """INSERT INTO quiz_quiz (quiz_name, quiz_code, subject, topic, teacher_id, top_score, score_avg) 
+                       VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+                    [quiz_name, quiz_code, subject, topic, teacher_id, 0, 0]
                 )
                 
                 messages.success(request, f'Quiz "{quiz_name}" created successfully! Quiz code: {quiz_code}')
@@ -107,15 +105,16 @@ def add_question(request, quiz_id):
                 correct_answers = request.POST.get('correct_answer', '')
             
             try:
-                # Insert question using raw SQL
-                question_id = str(uuid.uuid4())
+                # Insert question using raw SQL (let database auto-generate question_id)
                 import json
                 choices_json = json.dumps(choices) if choices else '{}'
+                # correct_answers also needs to be JSON format for JSONB field
+                correct_answers_json = json.dumps({"answer": correct_answers})
                 
                 cursor.execute(
-                    """INSERT INTO quiz_quizquestion (question_id, question, question_type, choices, correct_answers, score, quiz_id) 
-                       VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-                    [question_id, question, question_type, choices_json, correct_answers, float(score), quiz_id]
+                    """INSERT INTO quiz_quizquestion (question, question_type, choices, correct_answers, score, quiz_id) 
+                       VALUES (%s, %s, %s, %s, %s, %s)""",
+                    [question, question_type, choices_json, correct_answers_json, float(score), quiz_id]
                 )
                 
                 messages.success(request, 'Question added successfully!')
@@ -267,7 +266,7 @@ def take_quiz(request, quiz_id):
                     'question': q[1],
                     'question_type': q[2],
                     'choices': json.loads(q[3]) if q[3] else {},
-                    'correct_answers': q[4],
+                    'correct_answers': q[4],  # Keep as JSON for template (not needed in display)
                     'score': q[5]
                 }
                 questions.append(question)
@@ -322,11 +321,18 @@ def submit_quiz(request, quiz_id):
             total_score = 0
             max_score = 0
             
+            import json
             for question in questions_data:
-                question_id, question_type, correct_answer, score = question
+                question_id, question_type, correct_answer_json, score = question
                 max_score += score
                 student_answer = request.POST.get(f'question_{question_id}', '').strip()
-                correct_answer = str(correct_answer).strip()
+                
+                # Parse correct answer from JSON
+                try:
+                    correct_answer_data = json.loads(correct_answer_json)
+                    correct_answer = correct_answer_data.get('answer', '').strip()
+                except:
+                    correct_answer = str(correct_answer_json).strip()
                 
                 # Check if answer is correct (case-insensitive for text answers)
                 if question_type == 'short_answer':
@@ -357,11 +363,10 @@ def submit_quiz(request, quiz_id):
                 [top_score, score_avg, quiz_id]
             )
             
-            # Save student result using raw SQL
-            result_id = str(uuid.uuid4())
+            # Save student result using raw SQL (let database auto-generate result_id)
             cursor.execute(
-                "INSERT INTO quiz_result (result_id, score, top_score, score_avg, student_id, quiz_id) VALUES (%s, %s, %s, %s, %s, %s)",
-                [result_id, total_score, top_score, score_avg, student_id, quiz_id]
+                "INSERT INTO quiz_result (score, top_score, score_avg, student_id, quiz_id) VALUES (%s, %s, %s, %s, %s)",
+                [total_score, top_score, score_avg, student_id, quiz_id]
             )
             
             messages.success(request, f'Quiz submitted successfully! Your score: {total_score}/{max_score} ({percentage:.1f}%)')
@@ -438,7 +443,7 @@ def student_quiz_result(request, quiz_id):
             
             # Get all questions to show detailed results using raw SQL
             cursor.execute(
-                "SELECT question_id, question, question_type, choices, score FROM quiz_quizquestion WHERE quiz_id = %s ORDER BY question_id",
+                "SELECT question_id, question, question_type, choices, correct_answers, score FROM quiz_quizquestion WHERE quiz_id = %s ORDER BY question_id",
                 [quiz_id]
             )
             questions_data = cursor.fetchall()
@@ -448,15 +453,23 @@ def student_quiz_result(request, quiz_id):
             import json
             
             for q in questions_data:
+                # Parse correct answer from JSON for display
+                try:
+                    correct_answer_data = json.loads(q[4]) if q[4] else {}
+                    correct_answer_display = correct_answer_data.get('answer', 'N/A')
+                except:
+                    correct_answer_display = str(q[4]) if q[4] else 'N/A'
+                
                 question = {
                     'question_id': q[0],
                     'question': q[1],
                     'question_type': q[2],
                     'choices': json.loads(q[3]) if q[3] else {},
-                    'score': q[4]
+                    'score': q[5],
+                    'correct_answers': correct_answer_display  # Parsed for display
                 }
                 questions.append(question)
-                total_possible_score += q[4]
+                total_possible_score += q[5]
             
             percentage = (result['score'] / total_possible_score * 100) if total_possible_score > 0 else 0
             

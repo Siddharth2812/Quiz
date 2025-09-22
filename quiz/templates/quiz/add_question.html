@@ -49,8 +49,8 @@
             </div>
             
             <div class="form-group">
-                <label for="correct_choice">Correct Answer:</label>
-                <select id="correct_choice" name="correct_choice">
+                <label for="correct_choice">Correct Answer: <span style="color: red;">*</span></label>
+                <select id="correct_choice" name="correct_choice" required>
                     <option value="">Select Correct Answer</option>
                     <option value="A">Choice A</option>
                     <option value="B">Choice B</option>
@@ -62,8 +62,8 @@
         
         <div id="tf_section" style="display: none;">
             <div class="form-group">
-                <label for="tf_answer">Correct Answer:</label>
-                <select id="tf_answer" name="tf_answer">
+                <label for="tf_answer">Correct Answer: <span style="color: red;">*</span></label>
+                <select id="tf_answer" name="tf_answer" required>
                     <option value="">Select Correct Answer</option>
                     <option value="True">True</option>
                     <option value="False">False</option>
@@ -73,9 +73,9 @@
         
         <div id="short_answer_section" style="display: none;">
             <div class="form-group">
-                <label for="correct_answer">Correct Answer:</label>
+                <label for="correct_answer">Correct Answer: <span style="color: red;">*</span></label>
                 <input type="text" id="correct_answer" name="correct_answer" 
-                       placeholder="Enter the correct answer">
+                       placeholder="Enter the correct answer" required>
             </div>
         </div>
         
@@ -85,7 +85,7 @@
         </div>
         
         <div class="form-group" style="text-align: center; margin-top: 2rem;">
-            <button type="submit" class="btn">Add Question</button>
+            <button type="submit" class="btn" onclick="return validateForm()">Add Question</button>
             <a href="{% url 'teacher_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
         </div>
     </form>
@@ -115,14 +115,66 @@ function toggleChoices() {
     tfSection.style.display = 'none';
     shortAnswerSection.style.display = 'none';
     
-    // Show relevant section based on question type
+    // Clear required attributes from all answer fields
+    document.getElementById('correct_choice').removeAttribute('required');
+    document.getElementById('tf_answer').removeAttribute('required');
+    document.getElementById('correct_answer').removeAttribute('required');
+    
+    // Show relevant section based on question type and set required attribute
     if (questionType === 'multiple_choice') {
         choicesSection.style.display = 'block';
+        document.getElementById('correct_choice').setAttribute('required', 'required');
     } else if (questionType === 'true_false') {
         tfSection.style.display = 'block';
+        document.getElementById('tf_answer').setAttribute('required', 'required');
     } else if (questionType === 'short_answer') {
         shortAnswerSection.style.display = 'block';
+        document.getElementById('correct_answer').setAttribute('required', 'required');
     }
+}
+
+function validateForm() {
+    const questionType = document.getElementById('question_type').value;
+    
+    if (!questionType) {
+        alert('Please select a question type.');
+        return false;
+    }
+    
+    // Validate based on question type
+    if (questionType === 'multiple_choice') {
+        const choiceA = document.getElementById('choice_a').value.trim();
+        const choiceB = document.getElementById('choice_b').value.trim();
+        const correctChoice = document.getElementById('correct_choice').value;
+        
+        if (!choiceA || !choiceB) {
+            alert('Please provide at least Choice A and Choice B for multiple choice questions.');
+            return false;
+        }
+        
+        if (!correctChoice) {
+            alert('Please select the correct answer for the multiple choice question.');
+            return false;
+        }
+        
+    } else if (questionType === 'true_false') {
+        const tfAnswer = document.getElementById('tf_answer').value;
+        
+        if (!tfAnswer) {
+            alert('Please select the correct answer for the true/false question.');
+            return false;
+        }
+        
+    } else if (questionType === 'short_answer') {
+        const correctAnswer = document.getElementById('correct_answer').value.trim();
+        
+        if (!correctAnswer) {
+            alert('Please provide the correct answer for the short answer question.');
+            return false;
+        }
+    }
+    
+    return true;
 }
 </script>
 {% endblock %}
